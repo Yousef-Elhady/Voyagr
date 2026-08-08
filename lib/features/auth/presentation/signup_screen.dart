@@ -123,7 +123,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   children: [
                     Text("Already have an Account ?"),
                     GestureDetector(
-                      onTap: () => context.push(RouteNames.signup),
+                      onTap: () => context.push(RouteNames.login),
                       child: Text(
                         " Log In ",
                         style: TextStyle(
