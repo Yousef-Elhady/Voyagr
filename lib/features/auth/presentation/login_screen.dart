@@ -5,15 +5,63 @@ import 'package:ai_travel/core/widgets/divider.dart';
 import 'package:ai_travel/core/widgets/socialMedia.dart';
 import 'package:ai_travel/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:flutter/material.dart';
+import 'package:ai_travel/features/auth/application//auth_controller.dart';
+import 'package:ai_travel/features/auth/application//auth_state.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
+  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends ConsumerState<LoginScreen> {
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
+  @override
+  void initState(){
+    super.initState();
+
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    
+    ref.listenManual<AuthState>(
+      authControllerProvider,
+        (previous,next){
+        if (!mounted) return;
+
+        if (next is AuthStateAuthenticated) {
+          context.go(RouteNames.home);
+        }
+
+        if (next is AuthStateError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.message),
+            ),
+          );
+        }
+
+
+        }
+    );
+  }
+
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   Widget build(BuildContext context) {
-    final TextEditingController emailAdderss = TextEditingController();
-    final TextEditingController password = TextEditingController();
+
+    final authState = ref.watch(authControllerProvider);
+
+    final isLoading = authState is AuthStateLoading;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -37,14 +85,14 @@ class LoginScreen extends StatelessWidget {
               Text("Sign in to Continue your Journey"),
               SizedBox(height: 20),
               AuthTextField(
-                controller: emailAdderss,
+                controller: emailController,
                 hint: "explorer@gmail.com",
                 label: "Email Adderss",
                 iconData: Icons.email_outlined,
               ),
               AuthTextField(
                 isPassword: true,
-                controller: password,
+                controller: passwordController,
                 hint: "..........",
                 label: "Password",
                 iconData: Icons.lock_outline,
@@ -61,11 +109,26 @@ class LoginScreen extends StatelessWidget {
               ),
               SizedBox(height: 20),
               AppButton(
-                title: 'Sign In',
-                ontap: () {
-                  context.push(RouteNames.home);
-                },
+                  title: isLoading? 'Signing in... ': 'Sign In ',
+                  ontap: (){
+                    if (isLoading) return;
+                      final email = emailController.text.trim();
+                      final password = passwordController.text;
+
+                      if (email.isEmpty || password.isEmpty) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter your email and password.',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+                      ref.read(authControllerProvider.notifier).login(email: email, password: password);
+                    }
               ),
+
               SizedBox(height: 10),
               OrDivider(),
               SizedBox(height: 20),

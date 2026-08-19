@@ -4,85 +4,149 @@ import 'package:ai_travel/core/widgets/app_button.dart';
 import 'package:ai_travel/core/widgets/divider.dart';
 import 'package:ai_travel/core/widgets/socialMedia.dart';
 import 'package:ai_travel/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ai_travel/features/auth/application//auth_controller.dart';
+import 'package:ai_travel/features/auth/application//auth_state.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends ConsumerStatefulWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
+  ConsumerState<SignupScreen> createState() => _SignupScreenState();
 }
 
-class _SignupScreenState extends State<SignupScreen> {
-  TextEditingController username = TextEditingController();
-  TextEditingController email = TextEditingController();
-  TextEditingController password = TextEditingController();
-  dynamic agreeWithTirm = true;
+class _SignupScreenState extends ConsumerState<SignupScreen> {
+  late final TextEditingController NameController;
+  late final TextEditingController emailController;
+  late final TextEditingController passwordController;
+
+  bool agreeWithTerms = true;
+
+  @override
+  void initState() {
+    super.initState();
+
+    NameController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+
+    ref.listenManual<AuthState>(
+      authControllerProvider,
+          (previous, next) {
+        if (!mounted) return;
+
+        if (next is AuthStateAuthenticated) {
+          context.go(RouteNames.home);
+        }
+
+        if (next is AuthStateError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(next.message),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    NameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final authState = ref.watch(authControllerProvider);
+
+    final isLoading = authState is AuthStateLoading;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: EdgeInsetsGeometry.all(20),
+        padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
-
             children: [
               Logotext(title: "Voyagr"),
-              SizedBox(height: 20),
-              Text(
-                "Start Planing Your next Adventure With AI",
-                style: const TextStyle(
+
+              const SizedBox(height: 20),
+
+              const Text(
+                "Start Planning Your Next Adventure With AI",
+                style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 24,
                 ),
               ),
+
+              const SizedBox(height: 20),
+
               AuthTextField(
-                controller: username,
-                hint: "ziad elsayed",
-                label: "Full Name ",
-                iconData: Icons.person_2_outlined,
+                controller: NameController,
+                hint: "Marwan",
+                label: "Name",
+                iconData: Icons.person_outline,
               ),
               AuthTextField(
-                controller: email,
+                controller: emailController,
                 hint: "explorer@gmail.com",
-                label: "Email Adderss",
+                label: "Email Address",
                 iconData: Icons.email_outlined,
               ),
+
               AuthTextField(
                 isPassword: true,
-                controller: password,
+                controller: passwordController,
                 hint: "..........",
                 label: "Password",
                 iconData: Icons.lock_outline,
               ),
+
               Row(
                 children: [
                   Checkbox(
                     activeColor: Colors.deepOrangeAccent,
-                    value: agreeWithTirm,
+                    value: agreeWithTerms,
                     onChanged: (value) {
                       setState(() {
-                        agreeWithTirm = value;
+                        agreeWithTerms = value ?? false;
                       });
                     },
                   ),
+
                   Expanded(
                     child: RichText(
                       text: const TextSpan(
-                        style: TextStyle(color: Colors.black, fontSize: 14),
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 14,
+                        ),
                         children: [
-                          TextSpan(text: "I agree to the "),
+                          TextSpan(
+                            text: "I agree to the ",
+                          ),
                           TextSpan(
                             text: "Terms of Service",
-                            style: TextStyle(color: Colors.deepOrangeAccent),
+                            style: TextStyle(
+                              color: Colors.deepOrangeAccent,
+                            ),
                           ),
-                          TextSpan(text: " and "),
+                          TextSpan(
+                            text: " and ",
+                          ),
                           TextSpan(
                             text: "Privacy Policy.",
-                            style: TextStyle(color: Colors.deepOrangeAccent),
+                            style: TextStyle(
+                              color: Colors.deepOrangeAccent,
+                            ),
                           ),
                         ],
                       ),
@@ -90,16 +154,64 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+
+              const SizedBox(height: 20),
+
               AppButton(
-                title: 'Create Account ',
+                title: isLoading
+                    ? 'Creating Account...'
+                    : 'Create Account',
                 ontap: () {
-                  context.push(RouteNames.login);
+                  if (isLoading) return;
+
+                  if (!agreeWithTerms) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please agree to the Terms of Service.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  final Name =
+                  NameController.text.trim();
+
+                  final email =
+                  emailController.text.trim();
+
+                  final password =
+                      passwordController.text;
+
+                  if (Name.isEmpty ||
+                      email.isEmpty ||
+                      password.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Please fill in all fields.',
+                        ),
+                      ),
+                    );
+                    return;
+                  }
+
+                  ref
+                      .read(authControllerProvider.notifier)
+                      .register(
+                    name: Name,
+                    email: email,
+                    password: password,
+                  );
                 },
               ),
-              SizedBox(height: 10),
+
+              const SizedBox(height: 10),
+
               OrDivider(),
-              SizedBox(height: 10),
+
+              const SizedBox(height: 10),
 
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -116,16 +228,19 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+
+              const SizedBox(height: 20),
+
               Align(
                 alignment: Alignment.bottomCenter,
                 child: Row(
                   children: [
-                    Text("Already have an Account ?"),
+                    const Text("Already have an Account?"),
+
                     GestureDetector(
                       onTap: () => context.push(RouteNames.login),
-                      child: Text(
-                        " Log In ",
+                      child: const Text(
+                        " Log In",
                         style: TextStyle(
                           color: Colors.deepOrangeAccent,
                           fontWeight: FontWeight.bold,
