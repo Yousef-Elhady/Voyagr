@@ -1,4 +1,3 @@
-
 import 'package:ai_travel/core/di/service_locator.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
