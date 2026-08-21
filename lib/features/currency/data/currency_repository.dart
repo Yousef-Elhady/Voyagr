@@ -1,5 +1,4 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/di/service_locator.dart';
 import '../domain/exchange_rate.dart';
 import '../domain/favorite_currency_pair.dart';
 import 'currency_api.dart';
