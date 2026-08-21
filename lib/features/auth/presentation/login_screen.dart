@@ -20,33 +20,27 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
+  final _formKey = GlobalKey<FormState>();
   @override
-  void initState(){
+  void initState() {
     super.initState();
 
     emailController = TextEditingController();
     passwordController = TextEditingController();
-    
-    ref.listenManual<AuthState>(
-      authControllerProvider,
-        (previous,next){
-        if (!mounted) return;
 
-        if (next is AuthStateAuthenticated) {
-          context.go(RouteNames.home);
-        }
+    ref.listenManual<AuthState>(authControllerProvider, (previous, next) {
+      if (!mounted) return;
 
-        if (next is AuthStateError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(next.message),
-            ),
-          );
-        }
+      if (next is AuthStateAuthenticated) {
+        context.go(RouteNames.home);
+      }
 
-
-        }
-    );
+      if (next is AuthStateError) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(next.message)));
+      }
+    });
   }
 
   @override
@@ -57,7 +51,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Widget build(BuildContext context) {
-
     final authState = ref.watch(authControllerProvider);
 
     final isLoading = authState is AuthStateLoading;
@@ -68,108 +61,160 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         padding: const EdgeInsets.all(20),
 
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SizedBox(height: 20),
-              Logotext(title: "Voyagr"),
-              SizedBox(height: 20),
-              Text(
-                "Welcome Back ",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24,
-                ),
-              ),
-              SizedBox(height: 10),
-              Text("Sign in to Continue your Journey"),
-              SizedBox(height: 20),
-              AuthTextField(
-                controller: emailController,
-                hint: "explorer@gmail.com",
-                label: "Email Adderss",
-                iconData: Icons.email_outlined,
-              ),
-              AuthTextField(
-                isPassword: true,
-                controller: passwordController,
-                hint: "..........",
-                label: "Password",
-                iconData: Icons.lock_outline,
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: GestureDetector(
-                  onTap: () {},
-                  child: Text(
-                    "forget Password?",
-                    style: TextStyle(color: Colors.deepOrangeAccent),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                SizedBox(height: 20),
+                Logotext(title: "Voyagr"),
+                SizedBox(height: 20),
+                Text(
+                  "Welcome Back ",
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 24,
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              AppButton(
-                  title: isLoading? 'Signing in... ': 'Sign In ',
-                  ontap: (){
+                SizedBox(height: 10),
+                Text("Sign in to Continue your Journey"),
+                SizedBox(height: 20),
+                AuthTextField(
+                  controller: emailController,
+                  hint: "explorer@gmail.com",
+                  label: "Email Adderss",
+                  iconData: Icons.email_outlined,
+                  validator: (value) => validateEmail(value),
+                ),
+                AuthTextField(
+                  isPassword: true,
+                  controller: passwordController,
+                  hint: "..........",
+                  label: "Password",
+                  iconData: Icons.lock_outline,
+                  validator: (value) => validatePassword(value),
+                ),
+                Align(
+                  alignment: Alignment.topRight,
+                  child: GestureDetector(
+                    onTap: () {},
+                    child: Text(
+                      "forget Password?",
+                      style: TextStyle(color: Colors.deepOrangeAccent),
+                    ),
+                  ),
+                ),
+                SizedBox(height: 20),
+                AppButton(
+                  title: isLoading ? 'Signing in... ' : 'Sign In ',
+                  ontap: () {
                     if (isLoading) return;
-                      final email = emailController.text.trim();
-                      final password = passwordController.text;
+                    if (_formKey.currentState!.validate()) return;
+                    final email = emailController.text.trim();
+                    final password = passwordController.text;
 
-                      if (email.isEmpty || password.isEmpty) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Please enter your email and password.',
-                            ),
+                    if (email.isEmpty || password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Please enter your email and password.',
                           ),
-                        );
-                        return;
-                      }
-                      ref.read(authControllerProvider.notifier).login(email: email, password: password);
-                    }
-              ),
-
-              SizedBox(height: 10),
-              OrDivider(),
-              SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  UsingSocialmedia(
-                    icon: "assets/icons/google_icon.svg",
-                    ontap: () {},
-                    methodname: 'Google',
-                  ),
-                  UsingSocialmedia(
-                    icon: "assets/icons/apple_icon.svg",
-                    ontap: () {},
-                    methodname: 'Apple',
-                  ),
-                ],
-              ),
-              SizedBox(height: 40),
-              Align(
-                alignment: Alignment.bottomCenter,
-                child: Row(
-                  children: [
-                    Text("Don't Have an Account ?"),
-                    GestureDetector(
-                      onTap: () => context.push(RouteNames.signup),
-                      child: Text(
-                        "Sign UP ",
-                        style: TextStyle(
-                          color: Colors.deepOrangeAccent,
-                          fontWeight: FontWeight.bold,
                         ),
-                      ),
+                      );
+                      return;
+                    }
+                    ref
+                        .read(authControllerProvider.notifier)
+                        .login(email: email, password: password);
+                  },
+                ),
+
+                SizedBox(height: 10),
+                OrDivider(),
+                SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    UsingSocialmedia(
+                      icon: "assets/icons/google_icon.svg",
+                      ontap: () {},
+                      methodname: 'Google',
+                    ),
+                    UsingSocialmedia(
+                      icon: "assets/icons/apple_icon.svg",
+                      ontap: () {},
+                      methodname: 'Apple',
                     ),
                   ],
                 ),
-              ),
-            ],
+                SizedBox(height: 40),
+                Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Row(
+                    children: [
+                      Text("Don't Have an Account ?"),
+                      GestureDetector(
+                        onTap: () => context.push(RouteNames.signup),
+                        child: Text(
+                          "Sign UP ",
+                          style: TextStyle(
+                            color: Colors.deepOrangeAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+String? validateName(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Name is required';
+  }
+
+  final name = value.trim();
+
+  if (name.length < 3) {
+    return 'Name must be at least 3 characters';
+  }
+
+  if (!RegExp(r'^[A-Za-z\u0600-\u06FF]').hasMatch(name)) {
+    return 'Name must start with a letter';
+  }
+
+  return null;
+}
+
+String? validateEmail(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'Email is required';
+  }
+
+  final email = value.trim();
+
+  if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
+    return 'Please enter a valid email';
+  }
+
+  return null;
+}
+
+String? validatePassword(String? value) {
+  if (value == null || value.isEmpty) {
+    return 'Password is required';
+  }
+
+  if (value.length < 6) {
+    return 'Password must be at least 6 characters';
+  }
+
+  return null;
 }
