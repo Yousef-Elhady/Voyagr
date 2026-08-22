@@ -4,6 +4,7 @@ import 'package:ai_travel/core/widgets/app_button.dart';
 import 'package:ai_travel/core/widgets/divider.dart';
 import 'package:ai_travel/core/widgets/socialMedia.dart';
 import 'package:ai_travel/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:ai_travel/features/auth/presentation/widgets/validation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:ai_travel/features/auth/application//auth_controller.dart';
 import 'package:ai_travel/features/auth/application//auth_state.dart';
@@ -109,7 +110,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   title: isLoading ? 'Signing in... ' : 'Sign In ',
                   ontap: () {
                     if (isLoading) return;
-                    if (_formKey.currentState!.validate()) return;
+                    if (!_formKey.currentState!.validate()) return;
                     final email = emailController.text.trim();
                     final password = passwordController.text;
 
@@ -173,48 +174,4 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-}
-
-String? validateName(String? value) {
-  if (value == null || value.trim().isEmpty) {
-    return 'Name is required';
-  }
-
-  final name = value.trim();
-
-  if (name.length < 3) {
-    return 'Name must be at least 3 characters';
-  }
-
-  if (!RegExp(r'^[A-Za-z\u0600-\u06FF]').hasMatch(name)) {
-    return 'Name must start with a letter';
-  }
-
-  return null;
-}
-
-String? validateEmail(String? value) {
-  if (value == null || value.trim().isEmpty) {
-    return 'Email is required';
-  }
-
-  final email = value.trim();
-
-  if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email)) {
-    return 'Please enter a valid email';
-  }
-
-  return null;
-}
-
-String? validatePassword(String? value) {
-  if (value == null || value.isEmpty) {
-    return 'Password is required';
-  }
-
-  if (value.length < 6) {
-    return 'Password must be at least 6 characters';
-  }
-
-  return null;
 }

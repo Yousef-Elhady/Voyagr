@@ -3,10 +3,10 @@ import 'package:ai_travel/core/widgets/Logo.dart';
 import 'package:ai_travel/core/widgets/app_button.dart';
 import 'package:ai_travel/core/widgets/divider.dart';
 import 'package:ai_travel/core/widgets/socialMedia.dart';
-import 'package:ai_travel/features/auth/presentation/login_screen.dart';
 import 'package:ai_travel/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:ai_travel/features/auth/application//auth_controller.dart';
 import 'package:ai_travel/features/auth/application//auth_state.dart';
+import 'package:ai_travel/features/auth/presentation/widgets/validation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -149,7 +149,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                   title: isLoading ? 'Creating Account...' : 'Create Account',
                   ontap: () {
                     if (isLoading) return;
-                    if (_formKey.currentState!.validate()) return;
+                    if (!_formKey.currentState!.validate()) return;
                     if (!agreeWithTerms) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
