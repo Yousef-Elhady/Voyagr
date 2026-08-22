@@ -36,8 +36,16 @@ String? validatePassword(String? value) {
     return 'Password is required';
   }
 
-  if (value.length < 6) {
-    return 'Password must be at least 6 characters';
+  if (value.length < 8) {
+    return 'Password must be at least 8 characters';
+  }
+
+  final passwordRegex = RegExp(
+    r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$',
+  );
+
+  if (!passwordRegex.hasMatch(value)) {
+    return 'Password must contain uppercase, lowercase, number and special character';
   }
 
   return null;
