@@ -44,6 +44,10 @@ class ApiException implements Exception {
       );
     }
 
+    if (response == null) {
+      return ApiException(message: _defaultMessageFor(null));
+    }
+
     return ApiException(
       statusCode: statusCode,
       message: fallbackMessage ?? _defaultMessageFor(statusCode),
