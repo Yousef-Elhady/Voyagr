@@ -95,8 +95,7 @@ class AuthNotifier extends Notifier<AuthState> {
   // from api_client.dart's interceptor (see earlier files); anything
   // else (e.g. no internet) falls back to a generic message.
   String _readableError(Object e) {
-    final exception = ApiException.from(e);
-    return exception.message;
+    return ApiException.from(e).message;
   }
 }
 
