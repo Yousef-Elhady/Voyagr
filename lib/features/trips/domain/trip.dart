@@ -1,16 +1,31 @@
-class Trip {
+import 'package:hive_ce/hive.dart';
+part 'trip.g.dart';
 
+@HiveType(typeId: 0)
+class Trip {
+  @HiveField(0)
   final String id;
+  @HiveField(1)
   final String destination;
+  @HiveField(2)
   final DateTime startDate;
+  @HiveField(3)
   final DateTime endDate;
+  @HiveField(4)
   final int travelers;
+  @HiveField(5)
   final String? country;
+  @HiveField(6)
   final double? latitude;
+  @HiveField(7)
   final double? longitude;
+  @HiveField(8)
   final double? budgetTotal;
+  @HiveField(9)
   final bool? isSavedOffline;
+  @HiveField(10)
   final DateTime? createdAt;
+  @HiveField(11)
   final String? status;
 
   const Trip({
