@@ -54,7 +54,7 @@ class Trip {
       latitude: (json ['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
       budgetTotal: (json['budgetTotal'] as num?)?.toDouble(),
-      isSavedOffline: json['isSavedOffline'] as bool?,
+      isSavedOffline: json['isSavedOffline'] as bool? ?? false,
       createdAt:json['createdAt'] == null ? null : DateTime.parse(json['createdAt'] as String),
       status: json['status'] as String?
     );

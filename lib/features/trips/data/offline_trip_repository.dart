@@ -1,4 +1,6 @@
+import 'package:ai_travel/core/storage/local_db.dart';
 import 'package:ai_travel/features/trips/domain/trip.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_ce/hive_ce.dart';
 
 class OfflineTripRepository {
@@ -26,3 +28,8 @@ class OfflineTripRepository {
     return _tripBox.values.toList();
   }
 }
+
+final offlineTripRepositoryProvider = FutureProvider<OfflineTripRepository>((ref) async {
+  final box = await ref.watch(tripsBoxProvider.future);
+  return OfflineTripRepository(box);
+});
