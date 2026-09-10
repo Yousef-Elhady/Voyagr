@@ -58,7 +58,15 @@ class TripsRepository {
         travelers: travelers,
         budgetTotal: budgetTotal
     );
-    return Trip.fromJson(json);
+    final updatedTrip = Trip.fromJson(json);
+
+    final localTrip = _localDb.getLocalTrip(id);
+
+    if (localTrip != null) {
+      await _localDb.saveLocally(updatedTrip);
+    }
+
+    return updatedTrip;
   }
 
   Future<Trip> createTrip({
@@ -85,6 +93,7 @@ class TripsRepository {
 
   Future<void> deleteTrip({required String id}) async {
     await _tripsApi.deleteTrip(id: id);
+    await _localDb.deleteLocalTrip(id);
   }
 
   Future<void> deleteLocalTrip({required String id}) async{
@@ -112,7 +121,9 @@ class TripsRepository {
 
 }
 
-final tripsRepositoryProvider = FutureProvider<TripsRepository>( (ref) async {
+final tripsRepositoryProvider = Provider<TripsRepository>((ref) {
   return TripsRepository(
-    ref.watch(tripsApiProvider), await ref.watch(offlineTripRepositoryProvider.future));
+    ref.watch(tripsApiProvider),
+    ref.watch(offlineTripRepositoryProvider),
+  );
 });
