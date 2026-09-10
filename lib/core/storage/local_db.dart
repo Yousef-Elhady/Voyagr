@@ -3,8 +3,8 @@ import 'package:hive_ce_flutter/adapters.dart';
 import '../../features/trips/domain/trip.dart';
 
 
-final tripsBoxProvider = FutureProvider<Box<Trip>> ((ref) async {
-  final box = await Hive.openBox<Trip>('trips');
+final tripsBoxProvider = Provider<Box<Trip>> ((ref)  {
+  final box = Hive.box<Trip>('trips');
   return box;
 });
 
@@ -12,4 +12,5 @@ final tripsBoxProvider = FutureProvider<Box<Trip>> ((ref) async {
 Future<void> initHive() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TripAdapter());
+  await Hive.openBox<Trip>('trips');
 }

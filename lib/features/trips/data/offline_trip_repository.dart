@@ -29,7 +29,7 @@ class OfflineTripRepository {
   }
 }
 
-final offlineTripRepositoryProvider = FutureProvider<OfflineTripRepository>((ref) async {
-  final box = await ref.watch(tripsBoxProvider.future);
+final offlineTripRepositoryProvider = Provider<OfflineTripRepository>((ref) {
+  final box = ref.watch(tripsBoxProvider);
   return OfflineTripRepository(box);
 });
