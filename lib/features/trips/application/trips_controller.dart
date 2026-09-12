@@ -1,7 +1,6 @@
 import 'package:ai_travel/features/trips/application/trip_state.dart';
 import 'package:ai_travel/features/trips/data/trips_repository.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/network/api_exception.dart';
 
 class TripsNotifier extends Notifier<TripState> {
