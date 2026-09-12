@@ -27,6 +27,8 @@ class Trip {
   final DateTime? createdAt;
   @HiveField(11)
   final String? status;
+  @HiveField(12)
+  final String? tripImg;
 
   const Trip({
     required this.id,
@@ -41,6 +43,7 @@ class Trip {
     this.isSavedOffline,
     this.createdAt,
     this.status,
+    this.tripImg
   });
 
   factory Trip.fromJson(Map<String, dynamic>json){
@@ -56,7 +59,8 @@ class Trip {
       budgetTotal: (json['budgetTotal'] as num?)?.toDouble(),
       isSavedOffline: json['isSavedOffline'] as bool? ?? false,
       createdAt:json['createdAt'] == null ? null : DateTime.parse(json['createdAt'] as String),
-      status: json['status'] as String?
+      status: json['status'] as String?,
+      tripImg: json['tripImg'] as String?,
     );
   }
 
@@ -74,6 +78,7 @@ class Trip {
       'isSavedOffline': isSavedOffline,
       'createdAt' : createdAt?.toIso8601String() ,
       'status': status,
+      'tripImg': tripImg,
     };
   }
 
@@ -91,6 +96,7 @@ class Trip {
     bool? isSavedOffline,
     DateTime? createdAt,
     String? status,
+    String? tripImg,
   }) {
     return Trip(
       id: id,
@@ -105,6 +111,7 @@ class Trip {
       isSavedOffline: isSavedOffline ?? this.isSavedOffline,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
+      tripImg: tripImg?? this.tripImg,
     );
   }
 
