@@ -1,5 +1,5 @@
 import 'package:ai_travel/features/explore/application/cubit/explor_cubit.dart';
-import 'package:ai_travel/features/explore/presentation/widgets/destination_card.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/destination_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 

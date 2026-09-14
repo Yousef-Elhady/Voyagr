@@ -2,10 +2,10 @@ import 'package:ai_travel/core/theme/app_colors.dart';
 import 'package:ai_travel/core/widgets/appBar.dart';
 
 import 'package:ai_travel/features/explore/domain/destinationmodel.dart';
-import 'package:ai_travel/features/explore/presentation/widgets/destination_card.dart';
-import 'package:ai_travel/features/explore/presentation/widgets/exploretab.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/destination_card.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/exploretab.dart';
 import 'package:ai_travel/features/explore/presentation/widgets/search%20_bar.dart';
-import 'package:ai_travel/features/explore/presentation/widgets/search_barldart/explorDestinations.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/explorDestinations.dart';
 import 'package:flutter/material.dart' hide SearchBar;
 
 class ExploreScreen extends StatefulWidget {
