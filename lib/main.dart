@@ -3,14 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/storage/local_db.dart';
 
-void main()  async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initHive();
-  runApp(
-    const ProviderScope(
-    child: MyApp(),
-  ),
-  );
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatefulWidget {

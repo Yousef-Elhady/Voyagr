@@ -17,7 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 final GoRouter appRouter = GoRouter(
-  initialLocation: RouteNames.login,
+  initialLocation: RouteNames.explore,
   routes: <RouteBase>[
     GoRoute(
       path: RouteNames.home,
@@ -52,7 +52,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: RouteNames.explore,
           builder: (BuildContext context, GoRouterState state) {
-            return ExploreScreen();
+            return ExploreScreen(); 
           },
         ),
 
