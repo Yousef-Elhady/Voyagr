@@ -218,7 +218,7 @@ class AuthRepository {
       final expiresAt = DateTime.tryParse(expiresAtRaw);
 
       if (expiresAt != null &&
-          DateTime.now().isAfter(expiresAt)) {
+          DateTime.now().toUtc().isAfter(expiresAt.toUtc())) {
         try {
           await refresh();
         } catch (_) {

@@ -25,7 +25,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   late final TextEditingController passwordController;
   final _formKey = GlobalKey<FormState>();
 
-  bool agreeWithTerms = true;
+  bool agreeWithTerms = false;
 
   @override
   void initState() {

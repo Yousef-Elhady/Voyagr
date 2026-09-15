@@ -1,5 +1,4 @@
 String? validateName(String? value) {
-  print(2);
   if (value == null || value.trim().isEmpty) {
     return 'Name is required';
   }

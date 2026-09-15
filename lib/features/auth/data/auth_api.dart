@@ -37,7 +37,6 @@ class AuthApi {
         'password': password,
       },
     );
-    print('RAW SIGNUP RESPONSE: ${response.data}');
     return _unwrap(response);
   }
 

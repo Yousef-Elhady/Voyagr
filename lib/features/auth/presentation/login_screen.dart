@@ -51,6 +51,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.dispose();
   }
 
+  @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
 
@@ -83,7 +84,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 AuthTextField(
                   controller: emailController,
                   hint: "explorer@gmail.com",
-                  label: "Email Adderss",
+                  label: "Email Address",
                   iconData: Icons.email_outlined,
                   validator: (value) => validateEmail(value),
                 ),
@@ -114,16 +115,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     final email = emailController.text.trim();
                     final password = passwordController.text;
 
-                    if (email.isEmpty || password.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Please enter your email and password.',
-                          ),
-                        ),
-                      );
-                      return;
-                    }
                     ref
                         .read(authControllerProvider.notifier)
                         .login(email: email, password: password);
