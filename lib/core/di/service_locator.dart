@@ -1,25 +1,44 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+
+import '../../features/auth/data/auth_repository.dart';
 import '../network/api_client.dart';
+import '../network/auth_interceptor.dart';
 import '../storage/secure_storage.dart';
 
-/// Low-level, app-wide dependencies that don't belong to any single
-/// feature. Feature-specific providers (authApiProvider,
-/// authRepositoryProvider, currencyApiProvider, ...) do NOT live here —
-/// they're colocated with their own class, right in auth_api.dart,
-/// auth_repository.dart, etc. This file only holds the shared
-/// foundation every feature builds on top of.
-
-final secureStorageProvider = Provider<SecureStorage>((ref) {
+final secureStorageProvider =
+Provider<SecureStorage>((ref) {
   return SecureStorage();
 });
 
-final apiClientProvider = Provider<ApiClient>((ref) {
-  return ApiClient(ref.watch(secureStorageProvider));
+final authDioProvider = Provider<Dio>((ref) {
+  return Dio(
+    BaseOptions(
+      baseUrl: 'https://voyger-xrip.onrender.com/api/v1',
+      connectTimeout: const Duration(seconds: 30),
+      receiveTimeout: const Duration(seconds: 30),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    ),
+  );
 });
 
-/// Convenience so *_api.dart files can depend on `dioProvider` directly
-/// instead of reaching into `apiClientProvider.dio` every time.
+final apiClientProvider = Provider<ApiClient>((ref) {
+  final client = ApiClient();
+
+  final authRepository = ref.read(authRepositoryProvider);
+
+  client.dio.interceptors.add(
+    AuthInterceptor(
+      client.dio,
+      authRepository,
+    ),
+  );
+
+  return client;
+});
+
 final dioProvider = Provider<Dio>((ref) {
   return ref.watch(apiClientProvider).dio;
 });

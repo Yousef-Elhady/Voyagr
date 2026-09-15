@@ -15,6 +15,10 @@ class AuthRepository {
   static const _accessTokenExpiryKey = 'auth_token_expires_at';
   static const _refreshTokenKey ='auth_refresh_token';
 
+  Future<String?> getAccessToken() async {
+    return _secureStorage.read(_accessTokenKey);
+  }
+
   Future<User> register({
     required String firstName,
     required String lastName,
@@ -184,14 +188,19 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
-    final refreshToken = await _secureStorage.read(_refreshTokenKey);
-    try {
-      await _authApi.logout(refreshToken: refreshToken);
-    } catch (_) {
+    final refreshToken =
+    await _secureStorage.read(_refreshTokenKey);
+
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      try {
+        await _authApi.logout(
+          refreshToken: refreshToken,
+        );
+      } catch (_) {
+      }
     }
-    await _secureStorage.delete(_accessTokenKey);
-    await _secureStorage.delete(_accessTokenExpiryKey);
-    await _secureStorage.delete(_refreshTokenKey);
+
+    await clearTokens();
   }
 
   Future<bool> restoreSession() async {
