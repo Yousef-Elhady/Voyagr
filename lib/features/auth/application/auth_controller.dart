@@ -29,8 +29,8 @@ class AuthNotifier extends Notifier<AuthState> {
 
   // ── Startup: restore session from saved token ─────────────
   Future<void> _restoreSession() async {
-    final isLoggedIn = await _repo.isLoggedIn();
-    if (!isLoggedIn) {
+    final sessionRestore = await _repo.restoreSession();
+    if (!sessionRestore) {
       state = const AuthStateUnauthenticated();
       return;
     }
@@ -49,14 +49,16 @@ class AuthNotifier extends Notifier<AuthState> {
 
   // ── Register ──────────────────────────────────────────────
   Future<void> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
   }) async {
     state = const AuthStateLoading();
     try {
       await _repo.register(
-        name: name,
+        firstName: firstName,
+        lastName: lastName,
         email: email,
         password: password,
       );
@@ -65,7 +67,6 @@ class AuthNotifier extends Notifier<AuthState> {
       // the user in immediately after with the same credentials, which
       // gives a normal "sign up → you're in" experience while keeping
       // register() and login() cleanly separate at the repository level.
-      await login(email: email, password: password);
     } catch (e) {
       state = AuthStateError(_readableError(e));
     }

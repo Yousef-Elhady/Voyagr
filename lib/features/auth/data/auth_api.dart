@@ -9,15 +9,30 @@ class AuthApi {
 
   static const _basePath = '/auth';
 
-  Future<Map<String, dynamic>> register({
-    required String name,
+  Future<Map<String, dynamic>> refreshToken({
+    required String refreshToken,
+  }) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '$_basePath/refresh',
+      data: {
+        'refreshToken': refreshToken,
+      },
+    );
+
+    return _unwrap(response);
+  }
+
+  Future<Map<String, dynamic>> signup({
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
   }) async {
     final response = await _dio.post<Map<String, dynamic>>(
       '$_basePath/signup',
       data: {
-        'name': name,
+        'firstName': firstName,
+        'lastName': lastName,
         'email': email,
         'password': password,
       },
@@ -45,8 +60,13 @@ class AuthApi {
     return _unwrap(response);
   }
 
-  Future<void> logout() async {
-    await _dio.post<Map<String, dynamic>>('$_basePath/logout');
+  Future<void> logout({
+    required String? refreshToken,
+}) async {
+    await _dio.post<Map<String, dynamic>>('$_basePath/logout',
+    data: {
+      'refreshToken': refreshToken,
+    },);
   }
 
   Map<String, dynamic> _unwrap(Response<Map<String, dynamic>> response) {

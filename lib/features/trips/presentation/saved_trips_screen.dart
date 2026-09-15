@@ -133,9 +133,9 @@ class _SavedTripsScreenState extends ConsumerState<SavedTripsScreen> {
   List<Trip> _getTripsForFilter(TripState state){
     switch (_selectedFilter) {
       case 'Upcoming':
-        return state.trips;
+        return state.upcomingTrips;
       case 'Past':
-        return state.trips;
+        return state.pastTrips;
       case 'Saved':
         return state.offlineTrips;
       default:
