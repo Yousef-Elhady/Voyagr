@@ -19,7 +19,8 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
-  late final TextEditingController NameController;
+  late final TextEditingController firstNameController;
+  late final TextEditingController lastNameController;
   late final TextEditingController emailController;
   late final TextEditingController passwordController;
   final _formKey = GlobalKey<FormState>();
@@ -30,7 +31,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   void initState() {
     super.initState();
 
-    NameController = TextEditingController();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
     emailController = TextEditingController();
     passwordController = TextEditingController();
 
@@ -51,7 +53,8 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
   @override
   void dispose() {
-    NameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     passwordController.dispose();
 
@@ -86,9 +89,16 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 const SizedBox(height: 20),
 
                 AuthTextField(
-                  controller: NameController,
+                  controller: firstNameController,
                   hint: "Marwan",
-                  label: "Name",
+                  label: "First Name",
+                  iconData: Icons.person_outline,
+                  validator: (value) => validateName(value),
+                ),
+                AuthTextField(
+                  controller: lastNameController,
+                  hint: "Mohamed",
+                  label: "last Name",
                   iconData: Icons.person_outline,
                   validator: (value) => validateName(value),
                 ),
@@ -161,13 +171,14 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                       return;
                     }
 
-                    final Name = NameController.text.trim();
+                    final firstName = firstNameController.text.trim();
+                    final lastName = lastNameController.text.trim();
 
                     final email = emailController.text.trim();
 
                     final password = passwordController.text;
 
-                    if (Name.isEmpty || email.isEmpty || password.isEmpty) {
+                    if (firstName.isEmpty || lastName.isEmpty|| email.isEmpty || password.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
                           content: Text('Please fill in all fields.'),
@@ -178,7 +189,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
 
                     ref
                         .read(authControllerProvider.notifier)
-                        .register(name: Name, email: email, password: password);
+                        .register(firstName: firstName,lastName: lastName, email: email, password: password);
                   },
                 ),
 

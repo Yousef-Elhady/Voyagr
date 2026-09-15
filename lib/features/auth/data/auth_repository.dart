@@ -11,29 +11,53 @@ class AuthRepository {
   final AuthApi _authApi;
   final SecureStorage _secureStorage;
 
-  static const _tokenKey = 'auth_access_token';
-  static const _tokenExpiryKey = 'auth_token_expires_at';
+  static const _accessTokenKey = 'auth_access_token';
+  static const _accessTokenExpiryKey = 'auth_token_expires_at';
+  static const _refreshTokenKey ='auth_refresh_token';
+
+  Future<String?> getAccessToken() async {
+    return _secureStorage.read(_accessTokenKey);
+  }
 
   Future<User> register({
-    required String name,
+    required String firstName,
+    required String lastName,
     required String email,
     required String password,
   }) async {
-    final json = await _authApi.register(
-      name: name,
+    final json = await _authApi.signup(
+      firstName: firstName,
+      lastName: lastName,
       email: email,
       password: password,
     );
 
-    final token = json['token'];
+    final accessToken = json['accessToken'];
+    final refreshToken = json['refreshToken'];
+    final expiresAt = json['expiresAt'];
+
+
 
     final userJson = json['user'];
 
-    if (token is! String) {
+    if (expiresAt is! String) {
       throw Exception(
-        'token is missing or is not a String: $token',
+        'token is missing or is not a String: $accessToken',
       );
     }
+    await _secureStorage.write(_accessTokenExpiryKey, expiresAt);
+
+    if (accessToken is! String) {
+      throw Exception(
+        'token is missing or is not a String: $accessToken',
+      );
+    }
+    if (refreshToken is! String) {
+      throw Exception(
+        'refresh token is missing or is not a String: $refreshToken',
+      );
+    }
+
 
     if (userJson is! Map<String, dynamic>) {
       throw Exception(
@@ -42,8 +66,13 @@ class AuthRepository {
     }
 
     await _secureStorage.write(
-      _tokenKey,
-      token,
+      _accessTokenKey,
+      accessToken,
+    );
+
+    await _secureStorage.write(
+        _refreshTokenKey,
+        refreshToken,
     );
 
     return User.fromJson(userJson);
@@ -58,27 +87,29 @@ class AuthRepository {
       password: password,
     );
 
-    print('LOGIN RESPONSE: $json');
 
-    final token = json['token'];
-    //final expiresAt = json['expiresAt'];
+    final accessToken = json['accessToken'];
+    final refreshToken = json['refreshToken'];
+    final expiresAt = json['expiresAt'];
     final userJson = json['user'];
 
-    print('ACCESS TOKEN: $token');
-    //print('EXPIRES AT: $expiresAt');
-    print('USER: $userJson');
 
-    if (token is! String) {
+    if (accessToken is! String) {
       throw Exception(
-        'accessToken is missing or is not a String: $token',
+        'accessToken is missing or is not a String: $accessToken',
+      );
+    }
+    if (refreshToken is! String) {
+      throw Exception(
+        'refresh token is missing or is not a String: $refreshToken',
       );
     }
 
-    ///if (expiresAt is! String) {
-      ///throw Exception(
-        ///'expiresAt is missing or is not a String: $expiresAt',
-      ///);
-    ///}
+    if (expiresAt is! String) {
+      throw Exception(
+        'expiresAt is missing or is not a String: $expiresAt',
+      );
+    }
 
     if (userJson is! Map<String, dynamic>) {
       throw Exception(
@@ -87,14 +118,18 @@ class AuthRepository {
     }
 
     await _secureStorage.write(
-      _tokenKey,
-      token,
+      _accessTokenKey,
+      accessToken,
+    );
+    await _secureStorage.write(
+      _refreshTokenKey,
+      refreshToken,
     );
 
-    ///await _secureStorage.write(
-      ///_tokenExpiryKey,
-      ///expiresAt,
-    ///);
+    await _secureStorage.write(
+      _accessTokenExpiryKey,
+      expiresAt,
+    );
 
     return User.fromJson(userJson);
   }
@@ -104,26 +139,96 @@ class AuthRepository {
     return User.fromJson(json);
   }
 
-  Future<void> logout() async {
-    try {
-      await _authApi.logout();
-    } catch (_) {
-    }
-    await _secureStorage.delete(_tokenKey);
-    await _secureStorage.delete(_tokenExpiryKey);
+  Future<void> clearTokens() async {
+    await _secureStorage.delete(_accessTokenKey);
+    await _secureStorage.delete(_accessTokenExpiryKey);
+    await _secureStorage.delete(_refreshTokenKey);
   }
 
-  Future<bool> isLoggedIn() async {
-    final token = await _secureStorage.read(_tokenKey);
-    if (token == null || token.isEmpty) return false;
+  Future<void> refresh() async {
+    final refreshToken =
+    await _secureStorage.read(_refreshTokenKey);
 
-    final expiresAtRaw = await _secureStorage.read(_tokenExpiryKey);
-    if (expiresAtRaw == null) return true; // no expiry stored, assume valid
+    if (refreshToken == null || refreshToken.isEmpty) {
+      throw Exception('No refresh token');
+    }
 
-    final expiresAt = DateTime.tryParse(expiresAtRaw);
-    if (expiresAt == null) return true;
+    final json = await _authApi.refreshToken(
+      refreshToken: refreshToken,
+    );
 
-    return DateTime.now().isBefore(expiresAt);
+    final accessToken = json['accessToken'];
+    final newRefreshToken = json['refreshToken'];
+    final expiresAt = json['expiresAt'];
+
+    if (accessToken is! String) {
+      throw Exception('Invalid access token');
+    }
+
+    if (expiresAt is! String) {
+      throw Exception('Invalid expiresAt');
+    }
+
+    await _secureStorage.write(
+      _accessTokenKey,
+      accessToken,
+    );
+
+    await _secureStorage.write(
+      _accessTokenExpiryKey,
+      expiresAt,
+    );
+
+    if (newRefreshToken is String) {
+      await _secureStorage.write(
+        _refreshTokenKey,
+        newRefreshToken,
+      );
+    }
+  }
+
+  Future<void> logout() async {
+    final refreshToken =
+    await _secureStorage.read(_refreshTokenKey);
+
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      try {
+        await _authApi.logout(
+          refreshToken: refreshToken,
+        );
+      } catch (_) {
+      }
+    }
+
+    await clearTokens();
+  }
+
+  Future<bool> restoreSession() async {
+    final accessToken = await _secureStorage.read(_accessTokenKey);
+    final refreshToken = await _secureStorage.read(_refreshTokenKey);
+
+    if (accessToken == null|| accessToken.isEmpty || refreshToken == null) {
+      return false;
+    }
+
+    final expiresAtRaw =
+    await _secureStorage.read(_accessTokenExpiryKey);
+
+    if (expiresAtRaw != null) {
+      final expiresAt = DateTime.tryParse(expiresAtRaw);
+
+      if (expiresAt != null &&
+          DateTime.now().isAfter(expiresAt)) {
+        try {
+          await refresh();
+        } catch (_) {
+          await clearTokens();
+          return false;
+        }
+      }
+    }
+
+    return true;
   }
 }
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
