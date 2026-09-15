@@ -56,17 +56,13 @@ class AuthNotifier extends Notifier<AuthState> {
   }) async {
     state = const AuthStateLoading();
     try {
-      await _repo.register(
+      final user = await _repo.register(
         firstName: firstName,
         lastName: lastName,
         email: email,
         password: password,
       );
-      // Reminder: register does NOT return a token (see auth_repository.dart).
-      // We deliberately do not auto-authenticate here. Instead we log
-      // the user in immediately after with the same credentials, which
-      // gives a normal "sign up → you're in" experience while keeping
-      // register() and login() cleanly separate at the repository level.
+      state = AuthStateAuthenticated(user);
     } catch (e) {
       state = AuthStateError(_readableError(e));
     }
