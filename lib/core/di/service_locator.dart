@@ -1,13 +1,13 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../features/auth/data/auth_repository.dart';
 import '../network/api_client.dart';
 import '../network/auth_interceptor.dart';
+import '../network/token_interceptor.dart';
 import '../storage/secure_storage.dart';
 
-final secureStorageProvider =
-Provider<SecureStorage>((ref) {
+final secureStorageProvider = Provider<SecureStorage>((ref) {
   return SecureStorage();
 });
 
@@ -27,7 +27,12 @@ final authDioProvider = Provider<Dio>((ref) {
 final apiClientProvider = Provider<ApiClient>((ref) {
   final client = ApiClient();
 
+  final secureStorage = ref.watch(secureStorageProvider);
   final authRepository = ref.read(authRepositoryProvider);
+
+  client.dio.interceptors.add(
+    TokenInterceptor(secureStorage),
+  );
 
   client.dio.interceptors.add(
     AuthInterceptor(

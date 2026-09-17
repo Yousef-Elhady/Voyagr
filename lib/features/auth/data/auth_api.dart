@@ -60,7 +60,7 @@ class AuthApi {
   }
 
   Future<void> logout({
-    required String? refreshToken,
+    required String refreshToken,
 }) async {
     await _dio.post<Map<String, dynamic>>('$_basePath/logout',
     data: {
