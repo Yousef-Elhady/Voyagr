@@ -45,7 +45,6 @@ class AuthRepository {
         'token is missing or is not a String: $accessToken',
       );
     }
-    await _secureStorage.write(_accessTokenExpiryKey, expiresAt);
 
     if (accessToken is! String) {
       throw Exception(
@@ -57,6 +56,7 @@ class AuthRepository {
         'refresh token is missing or is not a String: $refreshToken',
       );
     }
+    await _secureStorage.write(_accessTokenExpiryKey, expiresAt);
 
 
     if (userJson is! Map<String, dynamic>) {
@@ -198,39 +198,51 @@ class AuthRepository {
         );
       } catch (_) {
       }
+      finally {
+        await clearTokens();
+      }
     }
-
-    await clearTokens();
   }
 
   Future<bool> restoreSession() async {
     final accessToken = await _secureStorage.read(_accessTokenKey);
     final refreshToken = await _secureStorage.read(_refreshTokenKey);
 
-    if (accessToken == null|| accessToken.isEmpty || refreshToken == null) {
+    if (accessToken == null ||
+        accessToken.isEmpty ||
+        refreshToken == null ||
+        refreshToken.isEmpty) {
       return false;
     }
 
     final expiresAtRaw =
     await _secureStorage.read(_accessTokenExpiryKey);
 
-    if (expiresAtRaw != null) {
-      final expiresAt = DateTime.tryParse(expiresAtRaw);
+    if (expiresAtRaw == null || expiresAtRaw.isEmpty) {
+      await clearTokens();
+      return false;
+    }
 
-      if (expiresAt != null &&
-          DateTime.now().toUtc().isAfter(expiresAt.toUtc())) {
-        try {
-          await refresh();
-        } catch (_) {
-          await clearTokens();
-          return false;
-        }
+    final expiresAt = DateTime.tryParse(expiresAtRaw);
+
+    if (expiresAt == null) {
+      await clearTokens();
+      return false;
+    }
+
+    if (DateTime.now().toUtc().isAfter(expiresAt.toUtc())) {
+      try {
+        await refresh();
+      } catch (_) {
+        await clearTokens();
+        return false;
       }
     }
 
     return true;
   }
 }
+
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
     ref.watch(authApiProvider),

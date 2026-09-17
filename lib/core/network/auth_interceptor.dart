@@ -13,20 +13,22 @@ class AuthInterceptor extends Interceptor {
 
   Future<void>? _refreshFuture;
 
-  @override
-  Future<void> onRequest(
-      RequestOptions options,
-      RequestInterceptorHandler handler,
-      ) async {
-    final accessToken =
-    await _authRepository.getAccessToken();
-
-    if (accessToken != null && accessToken.isNotEmpty) {
-      options.headers['Authorization'] =
-      'Bearer $accessToken';
+  Future<void> _refreshToken() {
+    if (_refreshFuture != null) {
+      return _refreshFuture!;
     }
 
-    handler.next(options);
+    final future = _authRepository.refresh();
+
+    _refreshFuture = future;
+
+    future.whenComplete(() {
+      if (identical(_refreshFuture, future)) {
+        _refreshFuture = null;
+      }
+    });
+
+    return future;
   }
 
   @override
@@ -34,7 +36,6 @@ class AuthInterceptor extends Interceptor {
       DioException err,
       ErrorInterceptorHandler handler,
       ) async {
-
     if (err.response?.statusCode != 401) {
       handler.next(err);
       return;
@@ -56,14 +57,7 @@ class AuthInterceptor extends Interceptor {
     }
 
     try {
-
-      _refreshFuture ??= _authRepository.refresh();
-
-      try {
-        await _refreshFuture!;
-      } finally {
-        _refreshFuture = null;
-      }
+      await _refreshToken();
 
       final newAccessToken =
       await _authRepository.getAccessToken();
@@ -89,7 +83,6 @@ class AuthInterceptor extends Interceptor {
       handler.resolve(response);
     } catch (_) {
       await _authRepository.clearTokens();
-
       handler.next(err);
     }
   }
