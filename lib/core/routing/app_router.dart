@@ -52,7 +52,7 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: RouteNames.explore,
           builder: (BuildContext context, GoRouterState state) {
-            return ExploreScreen(); 
+            return ProviderScreen();
           },
         ),
 

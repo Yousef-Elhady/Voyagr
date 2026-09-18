@@ -1,12 +1,50 @@
 import 'package:ai_travel/core/theme/app_colors.dart';
 import 'package:ai_travel/core/widgets/appBar.dart';
+import 'package:ai_travel/features/explore/application/Hotelcubit/hotel_cubit.dart';
+import 'package:ai_travel/features/explore/application/flight_cubit/flight_cubit.dart';
+import 'package:ai_travel/features/explore/data/flight_api.dart';
+import 'package:ai_travel/features/explore/data/flight_repository.dart';
+import 'package:ai_travel/features/explore/data/hotel_api.dart';
+import 'package:ai_travel/features/explore/data/hotelreopsitry.dart';
 
-import 'package:ai_travel/features/explore/domain/destinationmodel.dart';
-import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/destination_card.dart';
 import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/exploretab.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/flightTab/flight_search_page.dart';
+import 'package:ai_travel/features/explore/presentation/widgets/hotelTab/hotel_search_tab.dart';
 import 'package:ai_travel/features/explore/presentation/widgets/search%20_bar.dart';
 import 'package:ai_travel/features/explore/presentation/widgets/destinationTab/explorDestinations.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart' hide SearchBar;
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+class ProviderScreen extends StatefulWidget {
+  const ProviderScreen({super.key});
+
+  @override
+  State<ProviderScreen> createState() => _ProviderScreenState();
+}
+
+class _ProviderScreenState extends State<ProviderScreen> {
+  @override
+  Widget build(BuildContext context) {
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<FlightCubit>(
+          create: (_) => FlightCubit(
+            flightRepository: FlightRepository(
+              flightApi: FlightApi(dio: Dio()),
+            ),
+          ),
+        ),
+        BlocProvider<HotelCubit>(
+          create: (_) => HotelCubit(
+            hotelreopsitry: Hotelreopsitry(hotelApi: HotelApi(dio: Dio())),
+          ),
+        ),
+      ],
+      child: ExploreScreen(),
+    );
+  }
+}
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({super.key});
@@ -56,27 +94,10 @@ class _ExploreScreen extends State<ExploreScreen> {
         }),
       },
       children: [
-        Explordestinations(),
-        Explordestinations(),
-        _buildDestinationsCarousel3(),
+        const Explordestinations(),
+        const FlightSearchPage(),
+        const HotelSearchPage(),
       ],
-    );
-  }
-
-  Widget _buildDestinationsCarousel3() {
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      physics: const BouncingScrollPhysics(),
-      itemCount: dymmydestinationsdata.length,
-      itemBuilder: (context, index) {
-        return SizedBox(
-          height: 220, // arbitrary test value
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: DestinationCard(destination: dymmydestinationsdata[index]),
-          ),
-        );
-      },
     );
   }
 
@@ -116,5 +137,3 @@ class _ExploreScreen extends State<ExploreScreen> {
     );
   }
 }
-
-List<DestinationModel> dymmydestinationsdata = [];

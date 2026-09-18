@@ -1,5 +1,5 @@
-import 'package:ai_travel/features/explore/data/places_api.dart';
-import 'package:ai_travel/features/explore/data/places_repository.dart';
+import 'package:ai_travel/features/explore/data/destination_api.dart';
+import 'package:ai_travel/features/explore/data/destination_repository.dart';
 import 'package:ai_travel/features/explore/domain/destinationmodel.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
