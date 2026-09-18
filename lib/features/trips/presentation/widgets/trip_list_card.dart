@@ -1,17 +1,7 @@
-// lib/features/trips/presentation/widgets/trip_list_card.dart
 
 import 'package:flutter/material.dart';
 import '../../domain/trip.dart';
 
-/// Card shown in the Saved Trips list.
-///
-/// Already accepts a real [Trip] object (not dummy props) so that once
-/// `imageUrl` is added to the Trip model, this widget needs zero
-/// changes beyond swapping the placeholder for `trip.imageUrl`.
-///
-/// UI-only for now: [onTap] and [onDownloadTap] are just callbacks the
-/// parent screen can wire up later — this widget has no controller
-/// dependency itself.
 class TripListCard extends StatelessWidget {
   const TripListCard({
     super.key,

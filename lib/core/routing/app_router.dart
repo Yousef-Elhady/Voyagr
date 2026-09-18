@@ -101,7 +101,13 @@ final GoRouter appRouter = GoRouter(
         GoRoute(
           path: RouteNames.tripDetail,
           builder: (BuildContext context, GoRouterState state) {
-            return TripDetailScreen();
+            final tripId = state.extra;
+            if (tripId is! String) {
+              return const Scaffold(
+                body: Center(child: Text('No trip specified.')),
+              );
+            }
+            return TripDetailScreen(tripId: tripId);
           },
         ),
       ],
